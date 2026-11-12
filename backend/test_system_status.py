@@ -45,6 +45,13 @@ class SystemStatusTests(unittest.TestCase):
         self.assertEqual(result['data']['label'], 'Auf Abruf')
         self.assertEqual(result['backend']['label'], 'Online')
 
+    def test_ai_budget_limit_is_visible_while_python_remains_available(self):
+        result = self.read(background(settings={'enabled':True,'python_enabled':True,'gemini_enabled':True},
+                                      runtime={'status':'API_LIMIT'}, gemini_configured=True))
+        self.assertEqual(result['analysis']['label'], 'Eingeschränkt')
+        self.assertIn('Budget erreicht', result['analysis']['detail'])
+        self.assertEqual(result['state'], 'warn')
+
     def test_storage_failure_does_not_keep_previous_green_status(self):
         result = self.read(error=RuntimeError('storage unavailable'))
         self.assertEqual(result['state'], 'warn')

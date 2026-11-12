@@ -503,8 +503,13 @@ def system_status():
         analysis_detail += " · Gemini-Schlüssel fehlt"
         if running:
             analysis_label = "Eingeschränkt"
+    elif running and settings["gemini_enabled"] and state == "API_LIMIT":
+        analysis_label = "Eingeschränkt"
+        analysis_detail += " · Gemini-Budget erreicht"
+    if running and not profiles:
+        analysis_label = "Pausiert"
     result["analysis"] = {"label": analysis_label, "state": "ok" if analysis_label == "Aktiv" else "warn", "detail": analysis_detail}
-    if settings["enabled"] and (not running or last_error or analysis_label == "Eingeschränkt"):
+    if settings["enabled"] and (not running or last_error or analysis_label in ("Eingeschränkt", "Pausiert")):
         result.update(overall="Backend erreichbar · Betrieb eingeschränkt", state="warn")
     return result
 
