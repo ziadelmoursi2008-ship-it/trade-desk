@@ -1,0 +1,10 @@
+{
+  "name": "trade-desk-status",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 5174 --bind 127.0.0.1",
+    "build": "node build.mjs"
+  }
+}

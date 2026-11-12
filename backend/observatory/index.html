@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="app-mode" content="live">
+  <meta name="description" content="Verfügbarkeit, Datenversorgung und Analysebetrieb von Trade Desk.">
+  <meta name="theme-color" content="#0b1016">
+  <title>Systemstatus · Trade Desk</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e3e8ec;background:#0b1016;font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}button:disabled{cursor:wait;opacity:.55}a:focus-visible,button:focus-visible{outline:2px solid #86d9b5;outline-offset:5px}
+    .top{height:72px;border-bottom:1px solid #202a33;display:flex;align-items:center;justify-content:space-between;padding:0 max(24px,calc((100vw - 1120px)/2));gap:20px;background:#10171f}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.13em;font-size:13px}.brand-mark{color:#8cdbb7;background:#19372e;border-radius:8px;width:32px;height:32px;display:grid;place-items:center}.brand span.sep{color:#637484;font-weight:400}
+    .back{font-size:12px;color:#b5c3ce;border:1px solid #2c3944;border-radius:7px;padding:10px 14px;display:flex;gap:12px;align-items:center}.back:hover{background:#18232c}
+    main{max-width:800px;margin:88px auto 50px;padding:0 24px}.eyebrow{font-size:10px;color:#7d919f;font-weight:600;letter-spacing:.17em;margin:0 0 14px}h1{font-size:34px;line-height:1.2;letter-spacing:-.035em;margin:0 0 12px;font-weight:600}.intro{font-size:14px;color:#8fa1af;line-height:1.7;margin:0}
+    .summary{display:flex;gap:10px;align-items:center;margin:34px 0 18px;font-size:13px}.dot{width:7px;height:7px;flex-shrink:0;border-radius:50%;display:inline-block;background:#758793}.dot.ok{background:#86d9b5}.dot.warn{background:#d6ad71}.dot.error{background:#dd8c8c}
+    .services{border:1px solid #25313b;border-radius:12px;background:#10171f;overflow:hidden}.row{padding:25px 26px;display:flex;justify-content:space-between;gap:20px;align-items:center}.row+.row{border-top:1px solid #222d37}.label{display:flex;gap:15px;align-items:center}.icon{color:#7e94a3;display:grid;place-items:center;width:24px}.name{margin:0;font-size:14px;font-weight:500}.detail{margin:6px 0 0;color:#8295a5;font-size:12px;line-height:1.5}.badge{font-size:11px;white-space:nowrap;display:flex;gap:8px;align-items:center;color:#b5c4cf}.badge[data-state=ok]{color:#99d8b9}.badge[data-state=warn]{color:#d6b785}.badge[data-state=error]{color:#df9d9d}
+    .bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:19px 0;color:#6f8494;font-size:11px}.refresh{display:flex;align-items:center;gap:7px;background:transparent;border:0;color:#a7bac6;padding:8px 0}.refresh:hover{color:#e3e8ec}.note{font-size:12px;line-height:1.7;color:#8fa1af;border-left:2px solid #36564a;padding:0 0 0 16px;margin-top:34px}.footer{border-top:1px solid #202a33;padding-top:23px;margin-top:58px;display:flex;justify-content:space-between;gap:12px;color:#657d8d;font-size:11px}
+    @media(max-width:600px){.top{height:64px;padding:0 20px}.back{padding:9px 10px}.brand{font-size:11px;gap:8px}main{margin:52px auto 30px;padding:0 20px}h1{font-size:29px}.row{padding:23px 19px;align-items:flex-start;flex-direction:column;gap:13px}.badge{margin-left:39px}.bottom,.footer{align-items:flex-start;flex-direction:column;gap:7px}.detail{max-width:240px}}
+  </style>
+</head>
+<body>
+  <header class="top"><a class="brand" id="brand-link" href="/trading"><span class="brand-mark" aria-hidden="true">▥</span>TRADE <span class="sep">/</span> DESK</a><a class="back" id="trading-link" href="/trading">Zum Dashboard <span aria-hidden="true">↗</span></a></header>
+  <main>
+    <p class="eyebrow">PLATTFORM</p><h1>Systemstatus</h1><p class="intro">Verfügbarkeit und Analysebetrieb auf einen Blick.</p>
+    <div class="summary" role="status" aria-live="polite"><span class="dot" id="overall-dot"></span><span id="overall">Verbindung wird geprüft …</span></div>
+    <section class="services" aria-label="Status der Dienste">
+      <div class="row"><div class="label"><span class="icon" aria-hidden="true">◫</span><div><h2 class="name">Backend</h2><p class="detail" id="backend-detail">Verbindung zur Plattform</p></div></div><span class="badge" id="backend-badge">Wird geprüft</span></div>
+      <div class="row"><div class="label"><span class="icon" aria-hidden="true">⌁</span><div><h2 class="name">Marktdaten</h2><p class="detail" id="data-detail">Kursversorgung und Datenstand</p></div></div><span class="badge" id="data-badge">Wird geprüft</span></div>
+      <div class="row"><div class="label"><span class="icon" aria-hidden="true">≡</span><div><h2 class="name">Analysebetrieb</h2><p class="detail" id="analysis-detail">Automatische Hintergrundanalysen</p></div></div><span class="badge" id="analysis-badge">Wird geprüft</span></div>
+    </section>
+    <div class="bottom"><span id="checked">Noch keine Prüfung</span><button class="refresh" id="refresh" type="button"><span aria-hidden="true">↻</span> Erneut prüfen</button></div>
+    <p class="note" id="note">Dieser Status prüft die Erreichbarkeit der Dienste. Er bestätigt keine Echtzeitkurse und löst keine Analysen aus.</p>
+    <footer class="footer"><span>Trade Desk · Analyseplattform</span><span>Keine automatische Orderausführung</span></footer>
+  </main>
+  <script>
+    const demo = document.querySelector('meta[name="app-mode"]').content === 'demo';
+    const button = document.getElementById('refresh');
+    let request = null;
+    function row(name, value) {
+      const badge = document.getElementById(name + '-badge');
+      badge.textContent = value.label;
+      badge.dataset.state = value.state;
+      document.getElementById(name + '-detail').textContent = value.detail;
+    }
+    async function refresh() {
+      if (request) return;
+      request = new AbortController();
+      button.disabled = true;
+      try {
+        let data;
+        if (demo) {
+          data = { overall: 'Öffentliche Demo ist verfügbar', state: 'ok',
+            backend: { label: 'Demo-Modus', state: 'warn', detail: 'Diese Vorführung läuft direkt im Browser.' },
+            data: { label: 'Beispieldaten', state: 'warn', detail: 'Synthetische Kurse · kein Live-Marktdatenfeed' },
+            analysis: { label: 'Vorschau', state: 'warn', detail: 'Beispielanalysen · keine externen KI-Anfragen' } };
+        } else {
+          const response = await fetch('/api/system-status', { cache: 'no-store', signal: AbortSignal.any([request.signal, AbortSignal.timeout(8000)]) });
+          if (!response.ok) throw new Error('Status nicht verfügbar');
+          data = await response.json();
+          if (!data.backend || !data.data || !data.analysis) throw new Error('Ungültiger Status');
+        }
+        for (const name of ['backend', 'data', 'analysis']) row(name, data[name]);
+        document.getElementById('overall').textContent = data.overall;
+        document.getElementById('overall-dot').className = 'dot ' + data.state;
+        document.getElementById('checked').textContent = 'Zuletzt geprüft · ' + new Date().toLocaleTimeString('de-AT', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      } catch {
+        document.getElementById('overall').textContent = 'Backend derzeit nicht erreichbar';
+        document.getElementById('overall-dot').className = 'dot error';
+        row('backend', { label:'Offline', state:'error', detail:'Die Verbindung konnte nicht bestätigt werden.' });
+        row('data', { label:'Unbekannt', state:'warn', detail:'Aktueller Datenstatus nicht verfügbar' });
+        row('analysis', { label:'Unbekannt', state:'warn', detail:'Aktueller Analysestatus nicht verfügbar' });
+        document.getElementById('checked').textContent = 'Prüfung fehlgeschlagen · ' + new Date().toLocaleTimeString('de-AT');
+      } finally { request = null; button.disabled = false; }
+    }
+    if (demo) {
+      for (const id of ['brand-link', 'trading-link']) document.getElementById(id).href = '../';
+      document.getElementById('note').textContent = 'Portfolio-Demo mit synthetischen Beispieldaten. Live-Daten und KI-Analysen stehen in der lokal betriebenen Vollversion zur Verfügung.';
+    }
+    button.addEventListener('click', refresh);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    const timer = setInterval(() => { if (!document.hidden) refresh(); }, 30000);
+    window.addEventListener('pagehide', () => { clearInterval(timer); request?.abort(); });
+    refresh();
+  </script>
+</body>
+</html>
