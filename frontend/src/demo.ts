@@ -33,8 +33,9 @@ function analysis(ticker: string, timeframe: string, selected: AnalysisMode): An
   const target = quote * (1 + sign * .018);
   const stop = quote * (1 - sign * .008);
   const strength = Math.min(94, Math.round(76 + Math.abs(score)*.16));
+  const directionScore = Math.round((Math.max(-100, Math.min(100, score)) + 100) / 2);
   const reasons = ['Illustratives Szenario auf synthetischen Beispieldaten.', 'Die Indikatoren wurden mit der Python-Engine des Projekts berechnet.'];
-  const decision: TradeDecision = {ticker,timeframe,signal_type:up?'BUY':'SELL',score:up?strength:-strength,strength,
+  const decision: TradeDecision = {ticker,timeframe,signal_type:up?'BUY':'SELL',score:directionScore,strength,
     setup_quality:'B',current_price:quote,entry_price:quote,entry_zone_min:quote*.999,entry_zone_max:quote*1.001,
     stop_loss:stop,take_profit_1:target,take_profit_2:null,risk_reward_ratio:2.25,potential_profit_pct:1.8,risk_pct:.8,
     reasons,strategy_version:'portfolio-demo',as_of:end,decision_source:selected==='python'?'python':'demo',
@@ -86,7 +87,7 @@ export async function demoRequest<T>(path: string, body?: unknown): Promise<T> {
         .filter(item=>item.decision.strength>=minimum && (direction==='ALL'||item.decision.signal_type===direction))
         .sort((a,b)=>b.decision.strength-a.decision.strength);
       result={timeframe,min_strength:minimum,universe,scanned:universe.length,analyzed:universe.length,eligible:eligible.length,
-        best:eligible[0]||null,ranked_at:end,cached:true,ranking:'Synthetische Demo-Szenarien',message:'Keine passenden Beispielszenarien für diese Filter.',errors:[]}; break;
+        matches:eligible,best:eligible[0]||null,ranked_at:end,cached:true,ranking:'Synthetische Demo-Szenarien',message:'Keine passenden Beispielszenarien für diese Filter.',errors:[]}; break;
     }
     case '/api/backtests': {
       const slot={status:'DEMO',message:'In der Portfolio-Demo werden keine historischen Renditen oder KI-Freigaben simuliert. Backtests stehen in der lokalen Vollversion zur Verfügung.',result:null};

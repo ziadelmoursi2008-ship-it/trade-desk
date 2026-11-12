@@ -241,6 +241,6 @@ export interface KlinesResponse { ticker: string; timeframe: string; klines: Kli
 export interface ScanResponse {
   quantitative_enabled?: boolean;
   timeframe: string; min_strength: number; universe: string[]; scanned: number; analyzed: number;
-  eligible: number; best: AnalysisResponse | null; ranked_at: number; cached: boolean;
+  eligible: number; matches: AnalysisResponse[]; best: AnalysisResponse | null; ranked_at: number; cached: boolean;
   ranking: string; message: string | null; errors: Array<{ ticker: string; reason: string }>;
 }

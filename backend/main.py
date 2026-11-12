@@ -629,7 +629,7 @@ def scan_market(timeframe: Timeframe = "15m", min_strength: float = Query(75, ge
     response = {
         "timeframe": timeframe, "analysis_mode": mode, "min_strength": min_strength, "universe": universe,
         "scanned": len(universe), "analyzed": len(candidates), "eligible": len(ranked), "direction_filter":direction,
-        "best": ranked[0] if ranked else None, "errors": [error for _, error in results if error],
+        "matches": ranked, "best": ranked[0] if ranked else None, "errors": [error for _, error in results if error],
         "ranked_at": int(time.time() * 1000), "cached": False,
         "quantitative_enabled": quant_enabled,
         "ranking": ("Technische Hauptziele mit Timeframe-Mindeststrecke, vollständiger POI-Prüfung und mindestens 1R."

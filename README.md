@@ -12,7 +12,7 @@ und getrennten Python- und KI-Analyseprofilen.
 
 - Interaktiver Kerzenchart mit Instrumentensuche und sieben Zeitrahmen.
 - Technische Analyse mit Trend-, Momentum-, Volumen- und Risikokennzahlen.
-- Markt-Scanner mit Filtern für Richtung und Signalstärke.
+- Markt-Scanner mit Filtern für Richtung und Signalstärke sowie einer vollständigen Trefferliste.
 - Lokale Vollversion: Gemini-Kontext, LightGBM-Filter, SQLite-Archive und Backtests.
 - Kompakte Statusseite für Backend, Datenversorgung und Analysebetrieb.
 

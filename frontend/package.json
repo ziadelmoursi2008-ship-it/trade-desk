@@ -7,7 +7,7 @@
     "dev": "vite --configLoader native",
     "build": "tsc -b && vite build --configLoader native",
     "lint": "oxlint",
-    "test": "node tests/components.cjs",
+    "test": "node tests/components.cjs && node tests/demo.cjs",
     "preview": "vite preview"
   },
   "dependencies": {

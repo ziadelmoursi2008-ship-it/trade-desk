@@ -183,6 +183,17 @@ test('Manual mode switch exposes both choices and never advertises automatic fal
   assert(html.includes('Kein automatischer Wechsel'));
   assert.equal((html.match(/aria-pressed="true"/g) || []).length, 1);
 });
+test('Direction meter distinguishes bearish, neutral and bullish scores from signal strength', () => {
+  for (const score of [0,50,100]) {
+    const html=renderToStaticMarkup(React.createElement(DecisionPanel,{decision:{...decision,score,strength:92}}));
+    assert(html.includes('aria-valuenow="'+score+'"'));
+    assert(html.includes('aria-valuemin="0"'));
+    assert(html.includes('aria-valuemax="100"'));
+    assert(html.includes('50 = neutral'));
+    assert(html.includes('92/100'));
+  }
+});
+
 test('Technical decision is labeled as Python with a setup score instead of AI confidence', () => {
   const html = renderToStaticMarkup(React.createElement(DecisionPanel, {decision:{...decision,decision_source:'python',confidence:80}}));
   assert(html.includes('Technischer Setup-Score'));

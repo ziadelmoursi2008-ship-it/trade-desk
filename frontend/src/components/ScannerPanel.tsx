@@ -35,14 +35,14 @@ export function ScannerPanel({ onSelect, mode = 'gemini' }: {
       if (!controller.signal.aborted) setLoading(false);
     }
   }
-  const best = result?.best;
+  const matches = result?.matches ?? (result?.best ? [result.best] : []);
   return (
     <section className="mb-6 rounded-xl border border-cyan-500/25 bg-gradient-to-r from-cyan-950/25 to-slate-900/80 p-4" aria-label="Opportunity Scanner">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="flex items-center gap-2 text-sm font-bold text-cyan-200"><Sparkles className="h-4 w-4" /> Beste Gelegenheit finden</h2>
+          <h2 className="flex items-center gap-2 text-sm font-bold text-cyan-200"><Sparkles className="h-4 w-4" /> Marktchancen finden</h2>
           <p className="mt-1 text-xs text-emerald-200">Gespeicherte LightGBM-Modelle prüfen neue Einstiege lokal. Ein Scan trainiert keine Modelle.</p>
-          <p className="mt-1 max-w-2xl text-xs text-slate-400">{mode === 'python' ? 'Python vergleicht 16 Märkte ausschließlich anhand technischer Daten; keine KI und keine Nachrichten. Nächstes technisches Kursziel ab aktuellem Kurs unter starken A+/A/B-Ausblicken, mindestens 1R.' : 'Vergleicht 16 Aktien, ETFs, Gold und Kryptowährungen anhand validierter Gemini-Gesamtanalysen. Größtes TP1-Kurspotenzial unter A+/A/B-Setups, mindestens 1,5R.'}</p>
+          <p className="mt-1 max-w-2xl text-xs text-slate-400">{mode === 'python' ? 'Python vergleicht 16 Märkte ausschließlich anhand technischer Daten; keine KI und keine Nachrichten. Nächstes technisches Kursziel ab aktuellem Kurs unter A+/A/B-Ausblicken, mindestens 1R.' : 'Vergleicht 16 Aktien, ETFs, Gold und Kryptowährungen anhand validierter Gemini-Gesamtanalysen. A+/A/B-Setups mit mindestens 1,5R.'} Alle passenden Treffer ab der gewählten Signalstärke werden angezeigt.</p>
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <label className="text-[11px] text-slate-400">Märkte<select className="desk-select mt-1 block" aria-label="Scanner Märkte" disabled={loading} value={scope} onChange={e=>{setScope(e.target.value);setResult(null);}}><option value="all">Alle Märkte</option><option value="watchlist" disabled={!watchlist.length}>Meine Watchlist</option></select></label>
@@ -69,15 +69,22 @@ export function ScannerPanel({ onSelect, mode = 'gemini' }: {
           <div className="mt-4 border-t border-slate-700/70 pt-3">
             <p className="mb-3 text-[11px] text-slate-400">{result.analyzed}/{result.scanned} analysiert · {result.eligible} passend · {timeLabel(result.ranked_at)}{result.cached ? ' · kürzlich gescannt' : ''}{result.quantitative_enabled ? ' · inklusive Quant und verfügbarem Optionskontext' : ''}</p>
             <details className="mb-3 text-[11px] text-slate-400"><summary className="cursor-pointer">Verglichene Märkte anzeigen</summary><p className="mt-2">{result.universe.join(', ')}</p></details>
-            {best ? <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-bold text-white">{best.ticker} <span className={best.decision.signal_type === 'BUY' ? 'text-emerald-400' : 'text-red-400'}>{mode === 'python' ? (best.forecast?.direction === 'UP' ? 'TENDENZ AUFWÄRTS' : 'TENDENZ ABWÄRTS') : best.decision.signal_label || best.decision.signal_type}</span> · {mode === 'python' ? 'Ausblick ab jetzt' : best.decision.lifecycle_status || 'VORBEREITET'} · Grade {best.decision.setup_quality} · {result.timeframe}</p>
-                <p className="mt-1 text-xs text-slate-300">{mode === 'python' ? 'Ziel-Abstand ' : 'TP1-Potenzial '}{best.decision.potential_profit_pct?.toFixed(2)}% · Stärke {best.decision.strength}/100 · R:R 1:{best.decision.risk_reward_ratio?.toFixed(2)}</p>
-                <p className="mt-1 text-[11px] text-slate-400">{mode === 'python' ? <>Kurs {price(best.forecast?.reference_price,best.market.currency)} · Ziel {price(best.forecast?.target_price,best.market.currency)} · Ungültig ab {price(best.forecast?.invalidation_price,best.market.currency)}</> : <>Entry {price(best.decision.entry_price, best.market.currency)} · SL {price(best.decision.stop_loss, best.market.currency)} · TP1 {price(best.decision.take_profit_1, best.market.currency)}</>}</p>
-                {best.market.proxy_note && <p className="mt-1 text-[11px] text-amber-300">{best.market.proxy_note}</p>}
-              </div>
-              <button onClick={() => onSelect(best.ticker, result.timeframe)} className="flex items-center gap-2 rounded-lg border border-cyan-500/40 px-3 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-500/10">Im Chart öffnen <ArrowRight className="h-4 w-4" /></button>
-            </div> : <p className="text-xs text-amber-200">{result.message}</p>}
+            {matches.length > 0 ? <>
+              <h3 className="mb-3 text-xs font-semibold text-slate-300">{matches.length} Treffer ab {result.min_strength}/100 Signalstärke</h3>
+              <ul aria-label="Passende Marktchancen" className="space-y-2">{matches.map(item=><li key={item.ticker} className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-700/70 bg-slate-900/40 p-4">
+                <div className="min-w-0 flex-1 basis-64">
+                  <p className="text-sm font-semibold text-white">{item.ticker} <span className={'ml-2 text-xs '+(item.decision.signal_type==='BUY'?'text-emerald-400':'text-red-400')}>{mode==='python'?(item.forecast?.direction==='UP'?'Tendenz aufwärts':'Tendenz abwärts'):item.decision.signal_label||item.decision.signal_type}</span><span className="ml-2 text-[11px] font-normal text-slate-500">{result.timeframe} · Grade {item.decision.setup_quality}</span></p>
+                  <p className="mt-2 text-[11px] text-slate-400">Kurs {price(item.decision.current_price,item.market.currency)} · Ziel {price(mode==='python'?item.forecast?.target_price:item.decision.take_profit_1,item.market.currency)} · {mode==='python'?'Ungültig ab':'Stop'} {price(mode==='python'?item.forecast?.invalidation_price:item.decision.stop_loss,item.market.currency)}</p>
+                  {item.market.proxy_note&&<p className="mt-1 text-[11px] text-amber-300">{item.market.proxy_note}</p>}
+                </div>
+                <dl className="flex flex-wrap gap-5 text-xs">
+                  <div><dt className="text-[10px] text-slate-500">Signalstärke</dt><dd className="mt-1 font-semibold text-slate-200">{item.decision.strength}/100</dd></div>
+                  <div><dt className="text-[10px] text-slate-500">{mode==='python'?'Ziel-Abstand':'TP1-Potenzial'}</dt><dd className="mt-1 text-slate-300">{item.decision.potential_profit_pct?.toFixed(2)}%</dd></div>
+                  <div><dt className="text-[10px] text-slate-500">Risiko / Chance</dt><dd className="mt-1 text-slate-300">1:{item.decision.risk_reward_ratio?.toFixed(2)}</dd></div>
+                </dl>
+                <button type="button" aria-label={'Chart für '+item.ticker+' öffnen'} onClick={()=>onSelect(item.ticker,result.timeframe)} className="flex items-center gap-2 rounded-lg border border-cyan-500/40 px-3 py-2 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/10">Im Chart öffnen <ArrowRight className="h-4 w-4" /></button>
+              </li>)}</ul>
+            </> : <p className="text-xs text-amber-200">{result.message||'Keine passenden Marktchancen für diese Filter.'}</p>}
             {result.errors.length > 0 && <details className="mt-3 text-[11px] text-slate-400"><summary className="cursor-pointer">{result.errors.length} Instrumente nicht verfügbar</summary><ul className="mt-2 space-y-1">{result.errors.map(item => <li key={item.ticker}>{item.ticker}: {item.reason}</li>)}</ul></details>}
             <p className="mt-3 text-[10px] text-slate-500">Vergleich innerhalb der angezeigten Märkte. Kursziele und Signalstärke sind keine Gewinnwahrscheinlichkeit.</p>
           </div>

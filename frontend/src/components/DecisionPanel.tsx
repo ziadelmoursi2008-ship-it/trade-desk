@@ -15,6 +15,7 @@ export function DecisionPanel({ decision, currency, currentPrice }: { decision?:
   const rejected = decision.verification_status === 'rejected_proposal';
   const heading = active ? (decision.signal_label || decision.signal_type) : unavailable ? (python ? 'TECHNIK NICHT VERFÜGBAR' : 'KI NICHT VERFÜGBAR') : rejected ? 'VORSCHLAG UNGÜLTIG' : 'ABWARTEN';
   const color = buy ? 'text-emerald-400' : sell ? 'text-red-400' : 'text-slate-400';
+  const directionScore = Math.max(0, Math.min(100, decision.score));
   return (
     <section className="rounded-xl border border-slate-800 bg-[#0f172a] p-4 shadow-xl" aria-label="Trade-Analyse">
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -27,10 +28,10 @@ export function DecisionPanel({ decision, currency, currentPrice }: { decision?:
             {buy ? <ArrowUpRight className="h-7 w-7" /> : sell ? <ArrowDownRight className="h-7 w-7" /> : <MinusCircle className="h-7 w-7" />}
             <strong className="text-lg">{heading}</strong>
           </div>
-          <div className="text-right"><p className="text-[10px] text-slate-400">Richtungsscore</p><strong className="text-xl text-cyan-300">{decision.score}<span className="text-xs text-slate-500">/100</span></strong></div>
+          <div className="text-right"><p className="text-[10px] text-slate-400">Richtungsscore</p><strong className="text-xl text-cyan-300">{directionScore}<span className="text-xs text-slate-500">/100</span></strong></div>
         </div>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800"><div style={{ width: decision.score + '%' }} className={'h-full ' + (buy ? 'bg-emerald-500' : sell ? 'bg-red-500' : 'bg-slate-500')} /></div>
-        <div className="mt-1 flex justify-between text-[10px] text-slate-500"><span>0 = stark bearish</span><span>100 = stark bullish</span></div>
+        <div role="meter" aria-label="Richtungsscore" aria-valuemin={0} aria-valuemax={100} aria-valuenow={directionScore} aria-valuetext={directionScore+' von 100; 50 ist neutral'} className="relative mt-3 h-2 rounded-full bg-gradient-to-r from-red-500 via-slate-500 to-emerald-500"><span style={{left:directionScore+'%'}} className="absolute -top-0.5 h-3 w-1 -translate-x-1/2 rounded bg-white shadow" /></div>
+        <div className="mt-2 flex justify-between text-[10px] text-slate-500"><span>0 = stark bearish</span><span>50 = neutral</span><span>100 = stark bullish</span></div>
         <p className="mt-3 text-xs text-slate-400">{python ? 'Technischer Setup-Score: ' : 'Signalstärke: '}<span className={color}>{decision.strength}/100</span> · {decision.ticker} · {decision.timeframe}{!python && decision.confidence != null ? ' · KI-Konfidenz ' + decision.confidence + '/100' : ''}</p>
         {decision.lifecycle_status && <div className="mt-3 border-t border-slate-700 pt-3 text-xs">
           <p className="font-semibold text-cyan-200">{hasSetup ? decision.lifecycle_status : 'Noch kein bestätigter Handelsplan'}{decision.hold_previous ? ' · vorherige Richtung vorläufig halten' : ''}{decision.tp1_reached ? ' · TP1 erreicht' : ''}</p>
